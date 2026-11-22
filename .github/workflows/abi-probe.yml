@@ -20,7 +20,12 @@ jobs:
           mkdir -p /tmp/pokopia-abi/source /tmp/pokopia-abi/include/nxrecomp
           cp Makefile /tmp/pokopia-abi/Makefile
           cp probes/abi_probe.c /tmp/pokopia-abi/source/main.c
-          curl -fsSL --retry 3 https://raw.githubusercontent.com/Dittobyte/Recompia/main/recomp/include/nxrecomp/ctx.h -o /tmp/pokopia-abi/include/nxrecomp/ctx.h
+          # ctx.h includes two sibling helper headers: fpexact.h and neon.h.
+          for header in ctx.h fpexact.h neon.h; do
+            curl -fsSL --retry 3 "https://raw.githubusercontent.com/Dittobyte/Recompia/main/recomp/include/nxrecomp/$header" -o "/tmp/pokopia-abi/include/nxrecomp/$header"
+          done
+          test -s /tmp/pokopia-abi/include/nxrecomp/fpexact.h
+          test -s /tmp/pokopia-abi/include/nxrecomp/neon.h
           sed -i 's/$(CURDIR)\/$(BUILD) -I$(LIBNX)/$(CURDIR)\/$(BUILD) -I$(CURDIR)\/include -I$(LIBNX)/' /tmp/pokopia-abi/Makefile
           grep 'export INCLUDE' /tmp/pokopia-abi/Makefile
       - name: Compile ABI probe
