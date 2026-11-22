@@ -57,3 +57,7 @@ No port is available yet. The first milestone is compiling and running a minimal
 A separate GitHub Actions workflow, [Build deko3d GPU probe](.github/workflows/gpu-probe.yml), builds an experimental 854×480 deko3d triangle test based on the official switchbrew sample. This is **not** a game port and has **not** been verified on Switch Lite hardware.
 
 See [graphics research and test plan](docs/graphics-research.md) for evidence, caveats, and the next experiments.
+
+## Milestone 3: rotating 3D cube
+
+Use the [cube test workflow](.github/workflows/cube-test.yml) to compile the official deko3d example suite and select **03: Cube** in the resulting NRO. See [test instructions and verification criteria](docs/rotating-cube.md). This is an experimental graphics test, not a playable port.
