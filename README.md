@@ -51,3 +51,9 @@ This is an **unofficial, independent research project** and is not affiliated wi
 ## Current state
 
 No port is available yet. The first milestone is compiling and running a minimal Switch 1 homebrew application and documenting whether further work is feasible.
+
+## GPU research prototype
+
+A separate GitHub Actions workflow, [Build deko3d GPU probe](.github/workflows/gpu-probe.yml), builds an experimental 854×480 deko3d triangle test based on the official switchbrew sample. This is **not** a game port and has **not** been verified on Switch Lite hardware.
+
+See [graphics research and test plan](docs/graphics-research.md) for evidence, caveats, and the next experiments.
