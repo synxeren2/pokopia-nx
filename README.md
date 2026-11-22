@@ -65,3 +65,7 @@ Use the [cube test workflow](.github/workflows/cube-test.yml) to compile the off
 ## Recompia compatibility investigation
 
 Read the [source-grounded Switch 1 feasibility report](docs/recompia-switch1-feasibility.md). The first isolated test is the [nxrecomp ABI probe](.github/workflows/abi-probe.yml): it builds a small homebrew NRO from the upstream `ctx.h` interface. This does **not** load game code or prove the complete runtime can run on Switch.
+
+## G2: synthetic nxrecomp CPU helper execution
+
+The [G2 CPU probe](.github/workflows/cpu-helper-probe.yml) builds a standalone NRO exercising real nxrecomp arithmetic, condition and memory helper functions through a **manually authored** synthetic function. [Read the experiment details](docs/cpu-helper-g2.md). This is not lifted Pokopia code; runtime execution on Switch Lite is not yet verified.
