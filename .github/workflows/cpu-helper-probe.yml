@@ -1,0 +1,37 @@
+name: Build nxrecomp CPU helper probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/cpu_helper_probe.c'
+      - '.github/workflows/cpu-helper-probe.yml'
+
+jobs:
+  cpu-helper:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout Pokopia-NX
+        uses: actions/checkout@v4
+      - name: Prepare test project and upstream ABI headers
+        run: |
+          mkdir -p /tmp/pokopia-cpu/source /tmp/pokopia-cpu/include/nxrecomp
+          cp Makefile /tmp/pokopia-cpu/Makefile
+          cp probes/cpu_helper_probe.c /tmp/pokopia-cpu/source/main.c
+          for header in ctx.h fpexact.h neon.h; do
+            curl -fsSL --retry 3 "https://raw.githubusercontent.com/Dittobyte/Recompia/main/recomp/include/nxrecomp/$header" -o "/tmp/pokopia-cpu/include/nxrecomp/$header"
+          done
+          sed -i 's/$(CURDIR)\/$(BUILD) -I$(LIBNX)/$(CURDIR)\/$(BUILD) -I$(CURDIR)\/include -I$(LIBNX)/' /tmp/pokopia-cpu/Makefile
+      - name: Compile CPU helper NRO
+        run: |
+          cd /tmp/pokopia-cpu
+          make -j2
+          test -s pokopia-nx.nro
+      - name: Upload NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-cpu-helper-probe
+          path: /tmp/pokopia-cpu/pokopia-nx.nro
+          if-no-files-found: error
