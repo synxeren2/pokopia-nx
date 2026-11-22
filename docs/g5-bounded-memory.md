@@ -36,3 +36,13 @@ The implementation checks bounds by subtraction, avoiding `address + size` overf
 Before selecting a solution, investigate libnx/Horizon virtual-memory APIs, process address-space restrictions, and the cost of translating every access. Do **not** attempt arbitrary fixed-address mappings or large allocations on a user's device without a smaller verified design.
 
 This experiment does not measure gameplay performance, Switch 2/NVN2 compatibility, or Pokopia's RAM usage.
+
+## Physical Switch Lite test — 2026-11-22
+
+The user supplied a photo from the physical Switch Lite showing all 10 G5 cases as **PASS**, with the summary `10/10 tests passed` and `ALL PASS`. The screen reports guest base `0x7100000000` and backing capacity `64 KiB`.
+
+**Verified:** software-only checked translation into a 64 KiB host-owned array, ordinary 32/64-bit read/write, and rejection of invalid addresses, crossing bounds, misalignment, overflow-like extreme address and invalid arguments.
+
+**Not verified:** actual fixed-address Horizon OS virtual memory reservation, Recompia's raw-pointer guest accesses, guest permissions, guest loader or Pokopia memory requirements. In particular, printing a guest base address is **not proof that the process reserved that address**.
+
+**Next technical gate:** determine Horizon/libnx process address-space constraints and choose between a safe translated-pointer backend or genuine mapped guest memory. Start with an isolated small runtime memory bridge, avoiding large or unsafe mappings.
