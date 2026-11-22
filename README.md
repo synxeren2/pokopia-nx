@@ -73,3 +73,7 @@ The [G2 CPU probe](.github/workflows/cpu-helper-probe.yml) builds a standalone N
 ## G3: actual nxrecomp lift
 
 The [G3 GitHub Actions pipeline](.github/workflows/g3-lift.yml) converts a self-authored [AArch64 assembly fixture](probes/g3/tiny_aarch64.S) into C++ using Recompia's **real** `nxrecomp lift` command. [See scope and pass criteria](docs/g3-real-lifter.md). This workflow currently produces a generated-C++ artifact, **not a Switch NRO**, and must be verified before claiming a successful lift.
+
+## G4: execute real lifted output on Switch Lite
+
+The [G4 workflow](.github/workflows/g4-lifted-nro.yml) regenerates C++ with the **actual nxrecomp lifter**, compiles that generated source into a homebrew NRO, and tests two self-authored arithmetic routines. See [G4 test plan](docs/g4-generated-on-switch.md). This is **not a game port**; successful compilation and hardware execution remain unverified.
