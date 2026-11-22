@@ -85,3 +85,19 @@ Research only: G1 is not proof that the game's full generated code can run.
 - The 854×480 deko3d triangle drew in Android emulation.
 - The user photographed a cat-textured 3D cube, graphical waves and a teapot scene rendered on their physical Switch Lite using the deko3d example suite.
 - **No Recompia game code or GPU translation has been demonstrated on Switch Lite.**
+
+## G1 hardware result — 2026-11-22
+
+The user provided a photograph of the **physical Switch Lite** running the standalone `nxrecomp` ABI probe, showing:
+
+```text
+Pokopia-NX: nxrecomp ABI probe
+Header ABI version: 3
+Ctx bytes: 880 | V128 bytes: 16
+Register/vector/import tests: PASS
+Not a Pokopia port. Press PLUS to exit.
+```
+
+**Conclusion:** The upstream `ctx.h` with sibling `fpexact.h` and `neon.h` compiled against devkitA64/libnx and ran basic context/register/vector/import-ID tests on Switch Lite hardware. This is a limited but verified milestone. The full AArch64 semantics, indirect calls, guest SVCs, memory mapping, FP correctness, platform runtime, generated game code and NVN2 rendering are **not** verified.
+
+**Next gate:** build a synthetic, game-independent AArch64-to-C++ instruction execution experiment using the same context interface; validate arithmetic, flags and memory access without proprietary binaries. Include exact error reporting and maintain a separate `.nro` artifact.
