@@ -1,0 +1,31 @@
+name: Build rotating 3D cube test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/cube-test.yml'
+
+jobs:
+  cube:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Fetch official deko3d examples
+        run: |
+          git clone --depth 1 https://github.com/switchbrew/switch-examples.git /tmp/switch-examples
+          cp -a /tmp/switch-examples/graphics/deko3d/deko_examples /tmp/deko_examples
+      - name: Compile official examples including rotating cube
+        run: |
+          cd /tmp/deko_examples
+          make -j2
+          test -s deko_examples.nro
+      - name: Upload NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-3d-cube-test
+          path: /tmp/deko_examples/deko_examples.nro
+          if-no-files-found: error
