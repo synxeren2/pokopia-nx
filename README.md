@@ -61,3 +61,7 @@ See [graphics research and test plan](docs/graphics-research.md) for evidence, c
 ## Milestone 3: rotating 3D cube
 
 Use the [cube test workflow](.github/workflows/cube-test.yml) to compile the official deko3d example suite and select **03: Cube** in the resulting NRO. See [test instructions and verification criteria](docs/rotating-cube.md). This is an experimental graphics test, not a playable port.
+
+## Recompia compatibility investigation
+
+Read the [source-grounded Switch 1 feasibility report](docs/recompia-switch1-feasibility.md). The first isolated test is the [nxrecomp ABI probe](.github/workflows/abi-probe.yml): it builds a small homebrew NRO from the upstream `ctx.h` interface. This does **not** load game code or prove the complete runtime can run on Switch.
