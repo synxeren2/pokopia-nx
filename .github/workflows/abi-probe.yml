@@ -1,0 +1,36 @@
+name: Build nxrecomp ABI probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/abi_probe.c'
+      - '.github/workflows/abi-probe.yml'
+
+jobs:
+  abi-probe:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout Pokopia-NX
+        uses: actions/checkout@v4
+      - name: Prepare isolated prototype
+        run: |
+          mkdir -p /tmp/pokopia-abi/source /tmp/pokopia-abi/include/nxrecomp
+          cp Makefile /tmp/pokopia-abi/Makefile
+          cp probes/abi_probe.c /tmp/pokopia-abi/source/main.c
+          curl -fsSL --retry 3 https://raw.githubusercontent.com/Dittobyte/Recompia/main/recomp/include/nxrecomp/ctx.h -o /tmp/pokopia-abi/include/nxrecomp/ctx.h
+          sed -i 's/$(CURDIR)\/$(BUILD) -I$(LIBNX)/$(CURDIR)\/$(BUILD) -I$(CURDIR)\/include -I$(LIBNX)/' /tmp/pokopia-abi/Makefile
+          grep 'export INCLUDE' /tmp/pokopia-abi/Makefile
+      - name: Compile ABI probe
+        run: |
+          cd /tmp/pokopia-abi
+          make -j2
+          test -s pokopia-nx.nro
+      - name: Upload smoke test
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-abi-probe
+          path: /tmp/pokopia-abi/pokopia-nx.nro
+          if-no-files-found: error
