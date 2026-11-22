@@ -77,3 +77,7 @@ The [G3 GitHub Actions pipeline](.github/workflows/g3-lift.yml) converts a self-
 ## G4: execute real lifted output on Switch Lite
 
 The [G4 workflow](.github/workflows/g4-lifted-nro.yml) regenerates C++ with the **actual nxrecomp lifter**, compiles that generated source into a homebrew NRO, and tests two self-authored arithmetic routines. See [G4 test plan](docs/g4-generated-on-switch.md). This is **not a game port**; successful compilation and hardware execution remain unverified.
+
+## G5: safe guest-address translation
+
+[Build the G5 memory probe](.github/workflows/g5-memory.yml) to test a bounded 64 KiB software memory mapping (10 checks) on Switch 1. Read the [G5 report](docs/g5-bounded-memory.md). This is **not** an actual Horizon OS virtual-memory mapping and does not yet integrate with generated game code.
