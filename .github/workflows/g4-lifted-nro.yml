@@ -1,0 +1,74 @@
+name: G4 - run genuine lifted code on Switch 1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/g4/**'
+      - '.github/workflows/g4-lifted-nro.yml'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install AArch64 cross tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu python3-venv
+      - name: Create legal synthetic AArch64 ELF
+        run: |
+          mkdir -p build/g4
+          aarch64-linux-gnu-gcc -c -o build/g4/tiny.o probes/g3/tiny_aarch64.S
+          aarch64-linux-gnu-ld -static -e _start -Ttext=0x400000 -o build/g4/tiny.elf build/g4/tiny.o
+          aarch64-linux-gnu-nm -n build/g4/tiny.elf | tee build/g4/symbols.txt
+          grep -Eq '^0*400000 T tiny_sum$' build/g4/symbols.txt
+          grep -Eq '^0*400008 T tiny_difference$' build/g4/symbols.txt
+      - name: Invoke nxrecomp lifter
+        run: |
+          git clone --filter=blob:none --depth 1 https://github.com/Dittobyte/Recompia.git /tmp/recompia
+          git -C /tmp/recompia rev-parse HEAD | tee build/g4/recompia-commit.txt
+          python3 -m venv /tmp/g4-venv
+          /tmp/g4-venv/bin/pip install -r /tmp/recompia/recomp/requirements.txt
+          mkdir -p build/g4/lifted
+          cd /tmp/recompia/recomp
+          /tmp/g4-venv/bin/python -m nxrecomp lift "$GITHUB_WORKSPACE/build/g4/tiny.elf" "$GITHUB_WORKSPACE/build/g4/lifted" --kind static_elf --game generic --name g3tiny --jobs 1 --shards 1 --locals off
+          cp -a include/nxrecomp "$GITHUB_WORKSPACE/build/g4/"
+          grep 'f_400000(' "$GITHUB_WORKSPACE/build/g4/lifted/funcs.h"
+          grep 'f_400008(' "$GITHUB_WORKSPACE/build/g4/lifted/funcs.h"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: g4-generated-source
+          path: build/g4
+          if-no-files-found: error
+
+  build-nro:
+    needs: generate
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: g4-generated-source
+          path: /tmp/g4gen
+      - name: Assemble a Switch-native C++ project
+        run: |
+          mkdir -p /tmp/g4proj/source /tmp/g4proj/include
+          cp probes/g4/Makefile /tmp/g4proj/Makefile
+          cp probes/g4/main.cpp /tmp/g4proj/source/main.cpp
+          cp /tmp/g4gen/lifted/c_*.cpp /tmp/g4proj/source/
+          cp /tmp/g4gen/lifted/funcs.h /tmp/g4proj/source/
+          cp -a /tmp/g4gen/nxrecomp /tmp/g4proj/include/
+          ls -lh /tmp/g4proj/source
+      - name: Compile genuine generated C++ into NRO
+        run: |
+          cd /tmp/g4proj
+          make -j2
+          test -s pokopia-nx-g4.nro
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-g4-genuine-lift
+          path: /tmp/g4proj/pokopia-nx-g4.nro
+          if-no-files-found: error
