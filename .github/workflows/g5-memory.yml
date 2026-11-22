@@ -1,0 +1,33 @@
+name: G5 - bounded guest memory probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/g5/**'
+      - '.github/workflows/g5-memory.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout Pokopia-NX
+        uses: actions/checkout@v4
+      - name: Assemble isolated G5 build
+        run: |
+          mkdir -p /tmp/pokopia-g5/source
+          cp probes/g5/Makefile /tmp/pokopia-g5/Makefile
+          cp probes/g5/main.cpp /tmp/pokopia-g5/source/main.cpp
+      - name: Compile G5 Switch NRO
+        run: |
+          cd /tmp/pokopia-g5
+          make -j2
+          test -s pokopia-nx-g5.nro
+      - name: Upload prototype NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-g5-memory
+          path: /tmp/pokopia-g5/pokopia-nx-g5.nro
+          if-no-files-found: error
