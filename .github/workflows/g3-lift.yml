@@ -1,0 +1,54 @@
+name: G3 - real nxrecomp lift (synthetic AArch64)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/g3/**'
+      - '.github/workflows/g3-lift.yml'
+
+jobs:
+  lift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Pokopia-NX
+        uses: actions/checkout@v4
+      - name: Install AArch64 ELF build tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu python3-venv
+      - name: Build a self-authored, static AArch64 ELF
+        run: |
+          mkdir -p build/g3
+          aarch64-linux-gnu-gcc -c -o build/g3/tiny.o probes/g3/tiny_aarch64.S
+          aarch64-linux-gnu-ld -static -e _start -Ttext=0x400000 -o build/g3/tiny.elf build/g3/tiny.o
+          file build/g3/tiny.elf
+          aarch64-linux-gnu-readelf -h build/g3/tiny.elf
+          aarch64-linux-gnu-objdump -d build/g3/tiny.elf > build/g3/disassembly.txt
+      - name: Fetch Recompia lifter
+        run: |
+          git clone --filter=blob:none --depth 1 https://github.com/Dittobyte/Recompia.git /tmp/recompia
+          git -C /tmp/recompia rev-parse HEAD | tee build/g3/recompia-commit.txt
+          python3 -m venv /tmp/g3-venv
+          /tmp/g3-venv/bin/pip install -r /tmp/recompia/recomp/requirements.txt
+      - name: Run actual nxrecomp AArch64 to C++ lift
+        run: |
+          mkdir -p build/g3/lifted
+          cd /tmp/recompia/recomp
+          /tmp/g3-venv/bin/python -m nxrecomp lift "$GITHUB_WORKSPACE/build/g3/tiny.elf" "$GITHUB_WORKSPACE/build/g3/lifted" --kind static_elf --game generic --name g3tiny --jobs 1 --shards 1 --locals off
+          ls -la "$GITHUB_WORKSPACE/build/g3/lifted"
+      - name: Verify the generated output
+        run: |
+          test -s build/g3/lifted/funcs.h
+          test -s build/g3/lifted/module_g3tiny.cpp
+          find build/g3/lifted -name 'c_*.cpp' -size +0c | grep .
+          grep -R -E 'f_[0-9a-f]+' build/g3/lifted/funcs.h
+      - name: Upload evidence and generated C++ (not an NRO)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-g3-lifted-cpp
+          path: |
+            build/g3/lifted/
+            build/g3/disassembly.txt
+            build/g3/recompia-commit.txt
+          if-no-files-found: error
