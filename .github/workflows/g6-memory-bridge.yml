@@ -1,0 +1,73 @@
+name: G6 - lifted memory access bridge
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/g6/**'
+      - '.github/workflows/g6-memory-bridge.yml'
+
+jobs:
+  lift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install AArch64 tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu python3-venv
+      - name: Build original synthetic guest ELF
+        run: |
+          mkdir -p build/g6
+          aarch64-linux-gnu-gcc -c -o build/g6/memory_ops.o probes/g6/memory_ops.S
+          aarch64-linux-gnu-ld -static -e _start -Ttext=0x400000 -o build/g6/memory_ops.elf build/g6/memory_ops.o
+          aarch64-linux-gnu-nm -n build/g6/memory_ops.elf | tee build/g6/symbols.txt
+          grep -Eq '^0*400000 T g6_add64$' build/g6/symbols.txt
+          grep -Eq '^0*400010 T g6_add32$' build/g6/symbols.txt
+      - name: Run actual nxrecomp lifter
+        run: |
+          git clone --filter=blob:none --depth 1 https://github.com/Dittobyte/Recompia.git /tmp/recompia
+          git -C /tmp/recompia rev-parse HEAD | tee build/g6/recompia-commit.txt
+          python3 -m venv /tmp/g6-venv
+          /tmp/g6-venv/bin/pip install -r /tmp/recompia/recomp/requirements.txt
+          mkdir -p build/g6/lifted
+          cd /tmp/recompia/recomp
+          /tmp/g6-venv/bin/python -m nxrecomp lift "$GITHUB_WORKSPACE/build/g6/memory_ops.elf" "$GITHUB_WORKSPACE/build/g6/lifted" --kind static_elf --game generic --name g6mem --jobs 1 --shards 1 --locals off
+          cp -a include/nxrecomp "$GITHUB_WORKSPACE/build/g6/"
+          grep -F 'f_400000(' "$GITHUB_WORKSPACE/build/g6/lifted/funcs.h"
+          grep -F 'f_400010(' "$GITHUB_WORKSPACE/build/g6/lifted/funcs.h"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: g6-generated-cpp
+          path: build/g6
+          if-no-files-found: error
+
+  build-nro:
+    needs: lift
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: g6-generated-cpp
+          path: /tmp/g6-source
+      - name: Prepare minimal homebrew
+        run: |
+          mkdir -p /tmp/g6-proj/source /tmp/g6-proj/include
+          cp probes/g6/Makefile /tmp/g6-proj/Makefile
+          cp probes/g6/main.cpp /tmp/g6-proj/source/main.cpp
+          cp /tmp/g6-source/lifted/c_*.cpp /tmp/g6-proj/source/
+          cp /tmp/g6-source/lifted/funcs.h /tmp/g6-proj/source/
+          cp -a /tmp/g6-source/nxrecomp /tmp/g6-proj/include/
+      - name: Build Switch Lite NRO
+        run: |
+          cd /tmp/g6-proj
+          make -j2
+          test -s pokopia-nx-g6.nro
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-g6-memory-bridge
+          path: /tmp/g6-proj/pokopia-nx-g6.nro
+          if-no-files-found: error
