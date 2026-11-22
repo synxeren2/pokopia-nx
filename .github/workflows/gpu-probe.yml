@@ -1,0 +1,40 @@
+name: Build deko3d GPU probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gpu-probe.yml'
+
+jobs:
+  gpu-probe:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout research repository
+        uses: actions/checkout@v4
+
+      - name: Fetch official Switch deko3d example
+        run: |
+          git clone --depth 1 https://github.com/switchbrew/switch-examples.git /tmp/switch-examples
+          cp -a /tmp/switch-examples/graphics/deko3d/deko_basic /tmp/pokopia-gpu-probe
+
+      - name: Set 480p internal render target
+        run: |
+          sed -i 's/#define FB_WIDTH  1280/#define FB_WIDTH  854/' /tmp/pokopia-gpu-probe/source/main.c
+          sed -i 's/#define FB_HEIGHT 720/#define FB_HEIGHT 480/' /tmp/pokopia-gpu-probe/source/main.c
+          grep -E '#define FB_(WIDTH|HEIGHT)' /tmp/pokopia-gpu-probe/source/main.c
+
+      - name: Build GPU triangle NRO
+        run: |
+          cd /tmp/pokopia-gpu-probe
+          make -j2
+          test -s pokopia-gpu-probe.nro
+
+      - name: Upload GPU test NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-gpu-probe-480p
+          path: /tmp/pokopia-gpu-probe/pokopia-gpu-probe.nro
+          if-no-files-found: error
