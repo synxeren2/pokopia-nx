@@ -30,8 +30,22 @@ The CI workflow fetches and builds upstream `switchbrew/switch-examples` code in
 
 ## Exit criteria
 
-- [ ] CI builds successfully and uploads an NRO.
+- [x] CI builds successfully and uploads an NRO (inferred from user running produced NRO on console).
 - [ ] Emulator renders a continuously rotating cube.
 - [ ] Depth testing appears correct.
-- [ ] Real Switch Lite test performed.
+- [x] Real Switch Lite test performed (user report and photographs, 2026-11-22).
 - [ ] After verification, add resolution controls and per-frame timing measurements.
+
+## Real-hardware verification — 2026-11-22
+
+The user reports successfully running the downloaded deko3d example suite on a **physical Nintendo Switch Lite** and provided three photos showing rendered graphics:
+
+- A colorful wavy ribbon/line effect.
+- A cat-textured 3D cube with perspective and visible faces.
+- A bright teapot-shaped rendered 3D object.
+
+This confirms the pictured graphics examples rendered on the user's physical device, a stronger result than Android emulation alone. It supports basic native homebrew graphics / shader functionality on Switch 1.
+
+**Limits of evidence:** Photos do not establish continuous rotation, frame rates, frame-time stability, memory budgets, specific demo menu identifiers, or correct rendering of Pokémon Pokopia. No Recompia runtime has been loaded yet. The rotating cube's live motion and precise depth correctness still need an explicit test/observation.
+
+**Next research priority:** stop expanding generic graphics demos and perform an evidence-based compatibility assessment for Recompia: target architectures and ABI, dependencies, memory mapping, dynamic runtime, graphics translation, and 4 GB Switch memory budget. Prototype one tiny independent runtime subsystem only after identifying a concrete reuse opportunity.
