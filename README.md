@@ -69,3 +69,7 @@ Read the [source-grounded Switch 1 feasibility report](docs/recompia-switch1-fea
 ## G2: synthetic nxrecomp CPU helper execution
 
 The [G2 CPU probe](.github/workflows/cpu-helper-probe.yml) builds a standalone NRO exercising real nxrecomp arithmetic, condition and memory helper functions through a **manually authored** synthetic function. [Read the experiment details](docs/cpu-helper-g2.md). This is not lifted Pokopia code; runtime execution on Switch Lite is not yet verified.
+
+## G3: actual nxrecomp lift
+
+The [G3 GitHub Actions pipeline](.github/workflows/g3-lift.yml) converts a self-authored [AArch64 assembly fixture](probes/g3/tiny_aarch64.S) into C++ using Recompia's **real** `nxrecomp lift` command. [See scope and pass criteria](docs/g3-real-lifter.md). This workflow currently produces a generated-C++ artifact, **not a Switch NRO**, and must be verified before claiming a successful lift.
