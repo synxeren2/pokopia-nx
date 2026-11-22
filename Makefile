@@ -12,8 +12,10 @@ BUILD := build
 SOURCES := source
 ARCH := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections $(ARCH) -D__SWITCH__
+CFLAGS += $(INCLUDE)
 ASFLAGS := -g $(ARCH)
 LDFLAGS := -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS += $(LIBPATHS)
 LIBS := -lnx
 LIBDIRS := $(PORTLIBS) $(LIBNX)
 export APP_TITLE := Pokopia-NX Prototype
