@@ -47,3 +47,13 @@ A separate CI workflow (`.github/workflows/gpu-probe.yml`) fetches the official 
 - https://github.com/centollOS/SwitchWakerHD/blob/main/docs/switch-port.md
 
 Do not add copyrighted game data, keys, firmware, or proprietary assets to the repo.
+
+## Test result — 2026-11-22 (Android emulator)
+
+The user tested the CI-produced 854×480 deko3d triangle NRO on an Android Switch emulator. The screenshot displays a red/green/blue gradient triangle on a blue background, with the emulator overlay reporting approximately **59.9 FPS**. Device overlay identifies a Mali-G615 MC2 GPU / MT6878 SoC.
+
+**Verified by screenshot:** the emulator displayed the framebuffer and gradient triangle; basic shaders and graphics submission appear functional in this test.
+
+**Not verified:** exact emulator/version, actual Switch Lite GPU behavior, 3D depth and camera transforms, game performance, frame-time stability, or Nintendo Switch 2 game compatibility. The reported FPS is for this trivial graphics test only.
+
+**Next milestone:** implement or adopt a licensed rotating 3D cube example using deko3d, with depth testing and transform matrices; compare emulator behavior with physical Switch Lite before drawing performance conclusions.
