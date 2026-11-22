@@ -81,3 +81,7 @@ The [G4 workflow](.github/workflows/g4-lifted-nro.yml) regenerates C++ with the 
 ## G5: safe guest-address translation
 
 [Build the G5 memory probe](.github/workflows/g5-memory.yml) to test a bounded 64 KiB software memory mapping (10 checks) on Switch 1. Read the [G5 report](docs/g5-bounded-memory.md). This is **not** an actual Horizon OS virtual-memory mapping and does not yet integrate with generated game code.
+
+## G6: lifted memory access through a checked bridge
+
+[Build the G6 Switch NRO](.github/workflows/g6-memory-bridge.yml) to execute genuine nxrecomp-generated 64/32-bit LDR/STR operations against a small memory buffer with checked guest-to-host translation. See [G6 research and caveats](docs/g6-memory-bridge.md). This is a smoke test, **not** a general guest virtual-memory implementation or a playable game port.
