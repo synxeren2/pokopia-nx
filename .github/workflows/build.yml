@@ -1,0 +1,23 @@
+name: Build Switch prototype
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build NRO
+        run: make -j2
+      - name: Upload prototype
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-nx-prototype
+          path: pokopia-nx.nro
+          if-no-files-found: error
