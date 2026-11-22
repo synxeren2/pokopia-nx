@@ -39,3 +39,13 @@ All 7 must show **PASS** on console. These tests only use a pointer into a small
 Passing G2 is **not** proof that Pokopia, the NVN2 graphics engine, the full Recompia runtime or the game's generated code will work on Switch 1. It does not benchmark game performance, frame rate or total memory use. The CPU helper implementations may evolve upstream; the test currently retrieves Recompia main during CI, so the upstream revision should be pinned for reproducible long-term measurements.
 
 Recompia reference: https://github.com/Dittobyte/Recompia/blob/main/recomp/include/nxrecomp/ctx.h
+
+## Verified hardware result — 2026-11-22
+
+The user provided a photo of the G2 NRO running on a physical Nintendo Switch Lite. All seven individual tests show **PASS**, and the summary reads **nxrecomp ABI 3 | 7/7 tests passed; ALL PASS**.
+
+**What this validates:** Selected upstream `nxrecomp` CPU helpers for integer arithmetic, NZCV flags, conditions, simple memory loads/stores, and an author-written synthetic C call pattern work on this physical Switch Lite.
+
+**What remains unverified:** Actual lifter-generated output, real game binaries, guest virtual memory mappings, HLE services, NVN2 graphics, memory budgets, and game performance.
+
+**Next stage:** Create a legally self-authored AArch64 sample, run it through the actual `nxrecomp` lifter on a host machine, and compile its generated C/C++ with devkitA64; record generated source and test results before claiming end-to-end recompiler compatibility.
