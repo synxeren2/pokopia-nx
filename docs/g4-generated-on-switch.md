@@ -43,3 +43,20 @@ This workflow currently fetches the upstream moving main branch; **pin a tested 
 ## Future work
 
 A passing G4 is a prerequisite for a safely bounded guest-memory translation experiment and an OS interface test. Focus on realistic limitations before attempting any game-specific integration.
+
+## Verified physical-device result — 2026-11-22
+
+The user provided a photograph of the G4 NRO running on a physical Nintendo Switch Lite. The display reads:
+
+```text
+G4 genuine nxrecomp output
+SUM 12 + 30 = 42: PASS
+DIFF 50 - 8 = 42: PASS
+ALL PASS
+Synthetic input: NO Pokopia game code.
+PLUS to exit.
+```
+
+**Outcome: G4 passed on user hardware.** The self-authored AArch64 input was lifted by actual nxrecomp to C++, built into a Switch-native NRO, and the generated arithmetic functions produced expected results on hardware. The source is a small legal synthetic fixture, not a game executable. No Recompia guest services, graphics translation, complete memory layout, or Pokopia startup have been tested.
+
+**Recommended next step:** G5, an isolated bounded guest-address-space mapping and small memory semantics probe; preserve the working G4 workflow. Before using addresses from real game modules, measure contiguous virtual address availability, backing memory, and Horizon/libnx constraints. Never allocate multi-gigabyte buffers for a quick smoke test.
