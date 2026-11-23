@@ -1,0 +1,36 @@
+name: Switch Lite graphics benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'probes/graphics-benchmark/**'
+      - '.github/workflows/graphics-benchmark.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: switchbrew/switch-examples
+          ref: 669786898205b7beb25ff1731e72982e6d0397d3
+          path: upstream-switch-examples
+          persist-credentials: false
+      - name: Prepare and build the benchmark
+        run: |
+          cp -a upstream-switch-examples/graphics/deko3d/deko_basic /tmp/nx-graphics-benchmark
+          python3 probes/graphics-benchmark/prepare.py /tmp/nx-graphics-benchmark
+          make -C /tmp/nx-graphics-benchmark -j2 APP_TITLE="Switch Lite Graphics Benchmark"
+          test -s /tmp/nx-graphics-benchmark/nx-graphics-benchmark.nro
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nx-graphics-benchmark
+          path: /tmp/nx-graphics-benchmark/nx-graphics-benchmark.nro
+          if-no-files-found: error

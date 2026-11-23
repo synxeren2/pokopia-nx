@@ -85,3 +85,7 @@ The [G4 workflow](.github/workflows/g4-lifted-nro.yml) regenerates C++ with the 
 ## G6: lifted memory access through a checked bridge
 
 [Build the G6 Switch NRO](.github/workflows/g6-memory-bridge.yml) to execute genuine nxrecomp-generated 64/32-bit LDR/STR operations against a small memory buffer with checked guest-to-host translation. See [G6 research and caveats](docs/g6-memory-bridge.md). This is a smoke test, **not** a general guest virtual-memory implementation or a playable game port.
+
+## Switch Lite graphics benchmark
+
+The [standalone graphics benchmark](probes/graphics-benchmark/README.md) measures a synthetic scene across 480p, 75% render scale, and two draw-distance and geometry-detail settings at a 30 FPS target.
